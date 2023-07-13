@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollectionsAndLinq.BL", "CollectionsAndLinq.BL\CollectionsAndLinq.BL.csproj", "{AC67095D-2565-4050-9636-92CC5EA44962}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectionsAndLinq.UI", "CollectionsAndLinq.UI\CollectionsAndLinq.UI.csproj", "{7BF816E7-0120-4EC6-8834-C826F18FADA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{AC67095D-2565-4050-9636-92CC5EA44962}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC67095D-2565-4050-9636-92CC5EA44962}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC67095D-2565-4050-9636-92CC5EA44962}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BF816E7-0120-4EC6-8834-C826F18FADA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BF816E7-0120-4EC6-8834-C826F18FADA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BF816E7-0120-4EC6-8834-C826F18FADA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BF816E7-0120-4EC6-8834-C826F18FADA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
