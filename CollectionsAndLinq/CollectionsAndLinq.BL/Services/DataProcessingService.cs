@@ -10,9 +10,10 @@ namespace CollectionsAndLinq.BL.Services;
 // Add implementations to the methods and constructor. You can also add new members to the class.
 public class DataProcessingService : IDataProcessingService
 {
+    private readonly IDataProvider _dataProvider;
     public DataProcessingService(IDataProvider dataProvider)
     {
-        throw new NotImplementedException();
+        _dataProvider = dataProvider;   
     }
 
     public Task<Dictionary<string, int>> GetTasksCountInProjectsByUserIdAsync(int userId)

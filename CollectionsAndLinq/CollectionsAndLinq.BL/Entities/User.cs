@@ -1,13 +1,15 @@
-﻿namespace CollectionsAndLinq.BL.Entities;
+﻿using Newtonsoft.Json;
+
+namespace CollectionsAndLinq.BL.Entities;
 
 public record User(
-    int Id,
-    int? TeamId,
-    string FirstName,
-    string LastName,
-    string Email,
-    DateTime RegisteredAt,
-    DateTime BirthDay)
+    [JsonProperty("id")] int Id,
+    [JsonProperty("teamId")] int? TeamId,
+    [JsonProperty("firstName")] string FirstName,
+    [JsonProperty("lastName")] string LastName,
+    [JsonProperty("email")] string Email,
+    [JsonProperty("registeredAt")] DateTime RegisteredAt,
+    [JsonProperty("birthDay")] DateTime BirthDay)
 {
 
 }

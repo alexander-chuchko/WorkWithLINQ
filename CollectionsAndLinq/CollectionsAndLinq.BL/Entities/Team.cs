@@ -1,9 +1,12 @@
-﻿namespace CollectionsAndLinq.BL.Entities;
+﻿using Newtonsoft.Json;
+
+namespace CollectionsAndLinq.BL.Entities;
 
 public record Team(
-    int Id,
-    string Name,
-    DateTime CreatedAt)
+    [JsonProperty("id")] int Id,
+    [JsonProperty("name")] string Name,
+    [JsonProperty("createdAt")] DateTime CreatedAt)
 {
 
 }
+
