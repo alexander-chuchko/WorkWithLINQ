@@ -40,7 +40,6 @@ public class DataProcessingService : IDataProcessingService
         return result;
     }
 
-    //Test
     public async Task<List<TaskDto>> GetCapitalTasksByUserIdAsync(int userId)
     {
         var users = await _dataProvider.GetUsersAsync();
@@ -73,7 +72,6 @@ public class DataProcessingService : IDataProcessingService
         }
     }
 
-    //Test
     public async Task<List<(int Id, string Name)>> GetProjectsByTeamSizeAsync(int teamSize)
     {
         var users = await _dataProvider.GetUsersAsync();
@@ -254,19 +252,17 @@ public class DataProcessingService : IDataProcessingService
                         sortedProjects.OrderBy(p => p.Description) :
                         sortedProjects.OrderByDescending(p => p.Description));
                     break;
-                // Add other sorting cases here as needed
+
                 default:
                     break;
             }
         }
 
-        // Apply paging
         var totalCount = sortedProjects.Count();
         var pagedProjects = pageModel != null ?
             sortedProjects.Skip((pageModel.PageNumber - 1) * pageModel.PageSize).Take(pageModel.PageSize).ToList() :
             sortedProjects.ToList();
 
-        // Create FullProjectDto instances
         var fullProjectDtos = pagedProjects.Select(p => new FullProjectDto(
             p.Id,
             p.Name,
