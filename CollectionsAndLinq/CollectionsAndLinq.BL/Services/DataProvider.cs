@@ -121,7 +121,7 @@ namespace CollectionsAndLinq.BL.Services
 
             try
             {
-                HttpResponseMessage response = await _client.GetAsync(Constants.WEB_API_TEAMS);
+                HttpResponseMessage response = await _client.GetAsync(Constants.WEB_API_USERS);
 
                 response.EnsureSuccessStatusCode();
 

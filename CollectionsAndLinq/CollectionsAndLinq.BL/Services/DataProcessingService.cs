@@ -1,4 +1,6 @@
-﻿using CollectionsAndLinq.BL.Interfaces;
+﻿using CollectionsAndLinq.BL.Entities;
+using CollectionsAndLinq.BL.Extensions;
+using CollectionsAndLinq.BL.Interfaces;
 using CollectionsAndLinq.BL.Models;
 using CollectionsAndLinq.BL.Models.Projects;
 using CollectionsAndLinq.BL.Models.Tasks;
@@ -16,43 +18,249 @@ public class DataProcessingService : IDataProcessingService
         _dataProvider = dataProvider;   
     }
 
-    public Task<Dictionary<string, int>> GetTasksCountInProjectsByUserIdAsync(int userId)
+    public async Task<Dictionary<string, int>> GetTasksCountInProjectsByUserIdAsync(int userId)
     {
-        throw new NotImplementedException();
+        var users = await _dataProvider.GetUsersAsync();
+        var projects = await _dataProvider.GetProjectsAsync();
+        var tasks = await _dataProvider.GetTasksAsync();
+
+        var result = projects
+    .Where(project => project.AuthorId == userId)
+    .GroupJoin(tasks, project => project.Id, task => task.ProjectId, (project, projectTasks) => new
+        {
+            ProjectId = project.Id,
+            ProjectName = project.Name,
+            TaskCount = projectTasks.Count()
+        }
+    )
+    .ToDictionary(
+        project => $"{project.ProjectId} : {project.ProjectName}",
+        project => project.TaskCount
+    );
+        return result;
     }
 
-    public Task<List<TaskDto>> GetCapitalTasksByUserIdAsync(int userId)
+    public async Task<List<TaskDto>> GetCapitalTasksByUserIdAsync(int userId)
     {
-        throw new NotImplementedException();
+        var tasks = await _dataProvider.GetTasksAsync();
+        var results = tasks.FindAll(t => t.PerformerId == userId)
+                   .Select(e => e.ToTaskDto())
+                   .ToList();
+
+        return results;
     }
 
-    public Task<List<(int Id, string Name)>> GetProjectsByTeamSizeAsync(int teamSize)
+    public async Task<List<(int Id, string Name)>> GetProjectsByTeamSizeAsync(int teamSize)
     {
-        throw new NotImplementedException();
+        var users = await _dataProvider.GetUsersAsync();
+        var teams = await _dataProvider.GetTeamsAsync();
+        var projects = await _dataProvider.GetProjectsAsync();
+
+        var results = projects
+            .Join(
+                teams,
+                project => project.TeamId,
+                team => team.Id,
+                (project, team) => new { Project = project, Team = team }
+            )
+            .GroupJoin(
+                users,
+                projectTeam => projectTeam.Team.Id,
+                user => user.TeamId,
+                (projectTeam, usersGroup) => new { projectTeam.Project, UsersCount = usersGroup.Count() }
+            )
+            .Where(projectTeamUsersCount => projectTeamUsersCount.UsersCount > teamSize)
+            .Select(projectTeamUsersCount => (projectTeamUsersCount.Project.Id, projectTeamUsersCount.Project.Name))
+            .ToList();
+
+        return results;
     }
 
-    public Task<List<TeamWithMembersDto>> GetSortedTeamByMembersWithYearAsync(int year)
+    public async Task<List<TeamWithMembersDto>> GetSortedTeamByMembersWithYearAsync(int year)
     {
-        throw new NotImplementedException();
+        var users = await _dataProvider.GetUsersAsync();
+        var teams = await _dataProvider.GetTeamsAsync();
+        var projects = await _dataProvider.GetProjectsAsync();
+        var tasks = await _dataProvider.GetTasksAsync();
+
+        var results = teams
+            .OrderBy(team => team.Name)
+            .GroupJoin(
+                users,
+                team => team.Id,
+                user => user.TeamId,
+                (team, usersGroup) => new TeamWithMembersDto(team.Id, team.Name, usersGroup
+                    .Where(user => user.BirthDay.Year < year)
+                    .Where(user => user.RegisteredAt.Year > 0)
+                    .OrderByDescending(user => user.RegisteredAt)
+                    .Select(user => user.ToUserDto())
+                    .ToList())
+            )
+            .Where(teamWithMembers => teamWithMembers.Members.Any())
+            .ToList();
+
+        return results;
     }
 
-    public Task<List<UserWithTasksDto>> GetSortedUsersWithSortedTasksAsync()
+    public async Task<List<UserWithTasksDto>> GetSortedUsersWithSortedTasksAsync()
     {
-        throw new NotImplementedException();
+        var users = await _dataProvider.GetUsersAsync();
+        var tasks = await _dataProvider.GetTasksAsync();
+
+        var results = users
+            .OrderBy(user => user.FirstName)
+            .GroupJoin(
+                tasks,
+                user => user.Id,
+                task => task.PerformerId,
+                (user, userTasks) => new UserWithTasksDto(
+                    user.Id,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email,
+                    user.RegisteredAt,
+                    user.BirthDay,
+                    userTasks
+                        .Select(task => task.ToTaskDto())
+                        .OrderByDescending(task => task.Name.Length)
+                        .ToList()
+                )
+            )
+            .ToList();
+
+        return results;
     }
 
-    public Task<UserInfoDto> GetUserInfoAsync(int userId)
+    public async Task<UserInfoDto> GetUserInfoAsync(int userId)
     {
-        throw new NotImplementedException();
+        var users = await _dataProvider.GetUsersAsync();
+        var projects = await _dataProvider.GetProjectsAsync();
+        var tasks = await _dataProvider.GetTasksAsync();
+
+        var userInfoDto = users
+        .Where(user => user.Id == userId)
+        .GroupJoin(
+            projects,
+            user => user.Id,
+            project => project.AuthorId,
+            (user, userProjects) => new
+            {
+                User = user.ToUserDto(),
+                LastProject = userProjects
+                    .OrderByDescending(project => project.CreatedAt)
+                    .FirstOrDefault(),
+                Tasks = tasks.Where(task => task.PerformerId == user.Id)
+            }
+        )
+        .SelectMany(
+            x => x.Tasks.DefaultIfEmpty(),
+            (x, task) => new UserInfoDto(
+                x.User,
+                x.LastProject?.ToProjectDto(),
+            x.LastProject != null ? tasks.Count(t => t.ProjectId == x.LastProject.Id) : 0,
+                x.Tasks.Count(t => t.State == TaskState.ToDo || t.State == TaskState.InProgress || t.State == TaskState.Canceled),
+                x.Tasks.OrderByDescending(t => (t.FinishedAt ?? DateTime.Now) - t.CreatedAt).FirstOrDefault()?.ToTaskDto()
+            )
+        )
+        .FirstOrDefault();
+
+        return userInfoDto;
     }
 
-    public Task<List<ProjectInfoDto>> GetProjectsInfoAsync()
+    public async Task<List<ProjectInfoDto>> GetProjectsInfoAsync()
     {
-        throw new NotImplementedException();
+        var users = await _dataProvider.GetUsersAsync();
+        var teams = await _dataProvider.GetTeamsAsync();
+        var projects = await _dataProvider.GetProjectsAsync();
+        var tasks = await _dataProvider.GetTasksAsync();
+
+        var projectInfoDtoList = (
+            from project in projects
+            join task in tasks on project.Id equals task.ProjectId into projectTasks
+            let longestTaskByDescription = projectTasks.OrderByDescending(t => t.Description.Length).FirstOrDefault()
+            let shortestTaskByName = projectTasks.OrderBy(t => t.Name.Length).FirstOrDefault()
+            let teamMembersCount = project.Description.Length > 20 || projectTasks.Count() < 3 ? users.Count(u => u.TeamId == project.TeamId) : (int?)null
+            select new ProjectInfoDto(
+                new ProjectDto(project.Id, project.Name, project.Description, project.CreatedAt, project.Deadline),
+                longestTaskByDescription?.ToTaskDto(),
+                shortestTaskByName?.ToTaskDto(),
+                teamMembersCount)
+        ).ToList();
+
+        return projectInfoDtoList;
     }
 
-    public Task<PagedList<FullProjectDto>> GetSortedFilteredPageOfProjectsAsync(PageModel pageModel, FilterModel filterModel, SortingModel sortingModel)
+    public async Task<PagedList<FullProjectDto>> GetSortedFilteredPageOfProjectsAsync(PageModel pageModel, FilterModel filterModel, SortingModel sortingModel)
     {
-        throw new NotImplementedException();
+        var users = await _dataProvider.GetUsersAsync();
+        var teams = await _dataProvider.GetTeamsAsync();
+        var projects = await _dataProvider.GetProjectsAsync();
+        var tasks = await _dataProvider.GetTasksAsync();
+
+        // Apply filtering
+        var filteredProjects = projects;
+        if (filterModel != null)
+        {
+            if (!string.IsNullOrEmpty(filterModel.Name))
+                filteredProjects = (List<Project>)filteredProjects.Where(p => p.Name.Contains(filterModel.Name));
+            if (!string.IsNullOrEmpty(filterModel.Description))
+                filteredProjects = (List<Project>)filteredProjects.Where(p => p.Description.Contains(filterModel.Description));
+            if (!string.IsNullOrEmpty(filterModel.AuthorFirstName))
+                filteredProjects = (List<Project>)filteredProjects.Where(p => users.Any(u => u.Id == p.AuthorId && u.FirstName.Contains(filterModel.AuthorFirstName)));
+            if (!string.IsNullOrEmpty(filterModel.AuthorLastName))
+                filteredProjects = (List<Project>)filteredProjects.Where(p => users.Any(u => u.Id == p.AuthorId && u.LastName.Contains(filterModel.AuthorLastName)));
+            if (!string.IsNullOrEmpty(filterModel.TeamName))
+                filteredProjects = (List<Project>)filteredProjects.Where(p => teams.Any(t => t.Id == p.TeamId && t.Name.Contains(filterModel.TeamName)));
+        }
+
+        // Apply sorting
+        var sortedProjects = filteredProjects;
+        if (sortingModel != null)
+        {
+            switch (sortingModel.Property)
+            {
+                case SortingProperty.Name:
+                    sortedProjects = (List<Project>)(sortingModel.Order == SortingOrder.Ascending ?
+                        sortedProjects.OrderBy(p => p.Name) :
+                        sortedProjects.OrderByDescending(p => p.Name));
+                    break;
+                case SortingProperty.Description:
+                    sortedProjects = (List<Project>)(sortingModel.Order == SortingOrder.Ascending ?
+                        sortedProjects.OrderBy(p => p.Description) :
+                        sortedProjects.OrderByDescending(p => p.Description));
+                    break;
+                // Add other sorting cases here as needed
+                default:
+                    break;
+            }
+        }
+
+        // Apply paging
+        var totalCount = sortedProjects.Count();
+        var pagedProjects = pageModel != null ?
+            sortedProjects.Skip((pageModel.PageNumber - 1) * pageModel.PageSize).Take(pageModel.PageSize).ToList() :
+            sortedProjects.ToList();
+
+        // Create FullProjectDto instances
+        var fullProjectDtos = pagedProjects.Select(p => new FullProjectDto(
+            p.Id,
+            p.Name,
+            p.Description,
+            p.CreatedAt,
+            p.Deadline,
+            tasks.Where(t => t.ProjectId == p.Id).Select(t => new TaskWithPerformerDto(
+                t.Id,
+                t.Name,
+                t.Description,
+                t.State.ToString(),
+                t.CreatedAt,
+                t.FinishedAt,
+                users.FirstOrDefault(u => u.Id == t.PerformerId)?.ToUserDto()
+            )).ToList(),
+            users.FirstOrDefault(u => u.Id == p.AuthorId)?.ToUserDto(),
+            teams.FirstOrDefault(t => t.Id == p.TeamId)?.ToTeamDto()
+        )).ToList();
+
+        return new PagedList<FullProjectDto>(fullProjectDtos, totalCount);
     }
 }

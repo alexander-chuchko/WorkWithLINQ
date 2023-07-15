@@ -13,26 +13,3 @@ public record Project(
 {
 
 }
-
-/*
-public class Project
-{
-    public int ID { get; }
-    public int AuthorId { get; }
-    public int TeamId { get; }
-    public string Name { get; }
-    public string Description { get; }
-    public DateTime CreatedAt { get; }
-    public DateTime Deadline { get; }
-
-    public Project(int id, int authorId, int teamId, string name, string description, DateTime createdAt, DateTime deadline)
-    {
-        ID = id;
-        AuthorId = authorId;
-        TeamId = teamId;
-        Name = name;
-        Description = description;
-        CreatedAt = createdAt;
-        Deadline = deadline;
-    }
-}*/
