@@ -25,21 +25,22 @@ public class DataProcessingService : IDataProcessingService
         var tasks = await _dataProvider.GetTasksAsync();
 
         var result = projects
-    .Where(project => project.AuthorId == userId)
-    .GroupJoin(tasks, project => project.Id, task => task.ProjectId, (project, projectTasks) => new
-        {
-            ProjectId = project.Id,
-            ProjectName = project.Name,
-            TaskCount = projectTasks.Count()
-        }
-    )
-    .ToDictionary(
-        project => $"{project.ProjectId} : {project.ProjectName}",
-        project => project.TaskCount
-    );
+            .Where(project => project.AuthorId == userId)
+            .GroupJoin(tasks, project => project.Id, task => task.ProjectId, (project, projectTasks) => new
+            {
+                ProjectId = project.Id,
+                ProjectName = project.Name,
+                TaskCount = projectTasks.Count()
+            }
+        )
+        .ToDictionary(
+            project => $"{project.ProjectId} : {project.ProjectName}",
+            project => project.TaskCount
+        );
         return result;
     }
 
+    //Test
     public async Task<List<TaskDto>> GetCapitalTasksByUserIdAsync(int userId)
     {
         var users = await _dataProvider.GetUsersAsync();
@@ -53,13 +54,6 @@ public class DataProcessingService : IDataProcessingService
                            select new TaskDto(userTask.Id, userTask.Name, userTask.Description, MapTaskStateToString(userTask.State), userTask.CreatedAt, userTask.FinishedAt);
 
         return capitalTasks.ToList();
-        /*
-        var tasks = await _dataProvider.GetTasksAsync();
-        var results = tasks.FindAll(t => t.PerformerId == userId)
-                   .Select(e => e.ToTaskDto())
-                   .ToList();
-
-        return results;*/
     }
 
     private string MapTaskStateToString(TaskState state)
@@ -79,9 +73,9 @@ public class DataProcessingService : IDataProcessingService
         }
     }
 
+    //Test
     public async Task<List<(int Id, string Name)>> GetProjectsByTeamSizeAsync(int teamSize)
     {
-        /*
         var users = await _dataProvider.GetUsersAsync();
         var teams = await _dataProvider.GetTeamsAsync();
         var projects = await _dataProvider.GetProjectsAsync();
@@ -103,21 +97,7 @@ public class DataProcessingService : IDataProcessingService
             .Select(projectTeamUsersCount => (projectTeamUsersCount.Project.Id, projectTeamUsersCount.Project.Name))
             .ToList();
 
-        return results;*/
-        var projects = await _dataProvider.GetProjectsAsync();
-        var teams = await _dataProvider.GetTeamsAsync();
-
-        var projectsByTeamSize = projects
-            .Join(teams,
-                project => project.TeamId,
-                team => team.Id,
-                (project, team) => new { Project = project, Team = team })
-            .GroupBy(pt => new { pt.Project.Id, pt.Project.Name })
-            .Where(g => g.Count() > teamSize)
-            .Select(g => (g.Key.Id, g.Key.Name))
-            .ToList();
-
-        return projectsByTeamSize;
+        return results;
     }
 
     public async Task<List<TeamWithMembersDto>> GetSortedTeamByMembersWithYearAsync(int year)
@@ -166,7 +146,7 @@ public class DataProcessingService : IDataProcessingService
                     user.BirthDay,
                     userTasks
                         .Select(task => task.ToTaskDto())
-                        .OrderByDescending(task => task.Name.Length)
+                        .OrderBy(task => task.Name.Length)
                         .ToList()
                 )
             )
@@ -232,6 +212,7 @@ public class DataProcessingService : IDataProcessingService
         ).ToList();
 
         return projectInfoDtoList;
+        
     }
 
     public async Task<PagedList<FullProjectDto>> GetSortedFilteredPageOfProjectsAsync(PageModel pageModel, FilterModel filterModel, SortingModel sortingModel)
