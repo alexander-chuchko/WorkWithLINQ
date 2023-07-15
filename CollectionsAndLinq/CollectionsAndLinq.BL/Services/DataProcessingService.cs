@@ -42,16 +42,46 @@ public class DataProcessingService : IDataProcessingService
 
     public async Task<List<TaskDto>> GetCapitalTasksByUserIdAsync(int userId)
     {
+        var users = await _dataProvider.GetUsersAsync();
+        var tasks = await _dataProvider.GetTasksAsync();
+
+        var capitalTasks = from user in users
+                           join task in tasks on user.Id equals task.PerformerId into userTasks
+                           where user.Id == userId
+                           from userTask in userTasks.DefaultIfEmpty()
+                           where userTask != null && char.IsUpper(userTask.Name[0])
+                           select new TaskDto(userTask.Id, userTask.Name, userTask.Description, MapTaskStateToString(userTask.State), userTask.CreatedAt, userTask.FinishedAt);
+
+        return capitalTasks.ToList();
+        /*
         var tasks = await _dataProvider.GetTasksAsync();
         var results = tasks.FindAll(t => t.PerformerId == userId)
                    .Select(e => e.ToTaskDto())
                    .ToList();
 
-        return results;
+        return results;*/
+    }
+
+    private string MapTaskStateToString(TaskState state)
+    {
+        switch (state)
+        {
+            case TaskState.ToDo:
+                return "To Do";
+            case TaskState.InProgress:
+                return "In Progress";
+            case TaskState.Done:
+                return "Done";
+            case TaskState.Canceled:
+                return "Canceled";
+            default:
+                return "Unknown";
+        }
     }
 
     public async Task<List<(int Id, string Name)>> GetProjectsByTeamSizeAsync(int teamSize)
     {
+        /*
         var users = await _dataProvider.GetUsersAsync();
         var teams = await _dataProvider.GetTeamsAsync();
         var projects = await _dataProvider.GetProjectsAsync();
@@ -73,7 +103,21 @@ public class DataProcessingService : IDataProcessingService
             .Select(projectTeamUsersCount => (projectTeamUsersCount.Project.Id, projectTeamUsersCount.Project.Name))
             .ToList();
 
-        return results;
+        return results;*/
+        var projects = await _dataProvider.GetProjectsAsync();
+        var teams = await _dataProvider.GetTeamsAsync();
+
+        var projectsByTeamSize = projects
+            .Join(teams,
+                project => project.TeamId,
+                team => team.Id,
+                (project, team) => new { Project = project, Team = team })
+            .GroupBy(pt => new { pt.Project.Id, pt.Project.Name })
+            .Where(g => g.Count() > teamSize)
+            .Select(g => (g.Key.Id, g.Key.Name))
+            .ToList();
+
+        return projectsByTeamSize;
     }
 
     public async Task<List<TeamWithMembersDto>> GetSortedTeamByMembersWithYearAsync(int year)
