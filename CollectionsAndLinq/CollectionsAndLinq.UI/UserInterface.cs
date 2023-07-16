@@ -30,7 +30,7 @@ namespace CollectionsAndLinq.UI
             };
         }
 
-        public void GetTasksCountInProjectsByUserId()
+        private void GetTasksCountInProjectsByUserId()
         {
             ClearConsole();
             DisplayInfo();
@@ -56,7 +56,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetCapitalTasksByUserId()
+        private void GetCapitalTasksByUserId()
         {
             ClearConsole();
             DisplayInfo();
@@ -86,7 +86,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetProjectsByTeamSize()
+        private void GetProjectsByTeamSize()
         {
             ClearConsole();
             DisplayInfo();
@@ -112,7 +112,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetSortedTeamByMembersWithYear()
+        private void GetSortedTeamByMembersWithYear()
         {
             ClearConsole();
             DisplayInfo();
@@ -138,7 +138,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void PrintTeamWithMembers(TeamWithMembersDto team)
+        private void PrintTeamWithMembers(TeamWithMembersDto team)
         {
             Console.WriteLine($"\t{nameof(team.Id)} : {team.Id}\n\t{nameof(team.Name)} : {team.Name}\n\tMembers:\n\t");
             team.Members.ForEach(member =>
@@ -150,7 +150,7 @@ namespace CollectionsAndLinq.UI
             });
         }
 
-        public void GetSortedUsersWithSortedTasks()
+        private void GetSortedUsersWithSortedTasks()
         {
             ClearConsole();
             DisplayInfo();
@@ -165,7 +165,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void PrintUserWithTask(UserWithTasksDto userWithTasksDto)
+        private void PrintUserWithTask(UserWithTasksDto userWithTasksDto)
         {
             Console.WriteLine($"\t{nameof(userWithTasksDto.Id)} : {userWithTasksDto.Id}\n\t" +
                 $"{nameof(userWithTasksDto.FirstName)} : {userWithTasksDto.FirstName}\n\t" +
@@ -185,7 +185,7 @@ namespace CollectionsAndLinq.UI
             });
         }
 
-        public void GetUserInfo()
+        private void GetUserInfo()
         {
             ClearConsole();
             DisplayInfo();
@@ -218,7 +218,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetProjectsInfo()
+        private void GetProjectsInfo()
         {
             var result = _dataProcessingService.GetProjectsInfoAsync().GetAwaiter().GetResult();
             if (result != null)
