@@ -248,13 +248,13 @@ namespace CollectionsAndLinq.UI
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.WriteLine("\n\t" +
-                "1 - GetTasksCountInProjectsByUserIdAsync \n\t" +
-                "2 - GetCapitalTasksByUserIdAsync\n\t" +
-                "3 - GetProjectsByTeamSizeAsync\n\t" +
-                "4 - GetSortedTeamByMembersWithYearAsync\n\t" +
-                "5 - GetSortedUsersWithSortedTasksAsync\n\t" +
-                "6 - GetUserInfoAsync\n\t" +
-                "7 - GetProjectsInfoAsync\n\t");
+                "1 - Get Tasks Count In Projects By UserId \n\t" +
+                "2 - Get Capital Tasks By UserId\n\t" +
+                "3 - Get Projects By Team Size\n\t" +
+                "4 - Get Sorted Team By Members With Year\n\t" +
+                "5 - Get Sorted Users With Sorted Tasks\n\t" +
+                "6 - Get User Info\n\t" +
+                "7 - Get Projects Info\n\t");
 
             ChangedColor(ConsoleColor.Yellow);
             Console.WriteLine("\n\tSelect the desired item:\n");
