@@ -20,17 +20,17 @@ namespace CollectionsAndLinq.UI
         {
             return new Dictionary<int, Action>()
             {
-                {1, GetTasksCountInProjectsByUserIdAsync},
-                {2, GetCapitalTasksByUserIdAsync},
-                {3, GetProjectsByTeamSizeAsync},
-                {4, GetSortedTeamByMembersWithYearAsync},
-                {5, GetSortedUsersWithSortedTasksAsync},
-                {6, GetUserInfoAsync},
-                {7, GetProjectsInfoAsync},
+                {1, GetTasksCountInProjectsByUserId},
+                {2, GetCapitalTasksByUserId},
+                {3, GetProjectsByTeamSize},
+                {4, GetSortedTeamByMembersWithYear},
+                {5, GetSortedUsersWithSortedTasks},
+                {6, GetUserInfo},
+                {7, GetProjectsInfo},
             };
         }
 
-        public void GetTasksCountInProjectsByUserIdAsync()
+        public void GetTasksCountInProjectsByUserId()
         {
             ClearConsole();
             DisplayInfo();
@@ -56,7 +56,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetCapitalTasksByUserIdAsync()
+        public void GetCapitalTasksByUserId()
         {
             ClearConsole();
             DisplayInfo();
@@ -86,7 +86,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetProjectsByTeamSizeAsync()
+        public void GetProjectsByTeamSize()
         {
             ClearConsole();
             DisplayInfo();
@@ -112,7 +112,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetSortedTeamByMembersWithYearAsync()
+        public void GetSortedTeamByMembersWithYear()
         {
             ClearConsole();
             DisplayInfo();
@@ -150,7 +150,7 @@ namespace CollectionsAndLinq.UI
             });
         }
 
-        public void GetSortedUsersWithSortedTasksAsync()
+        public void GetSortedUsersWithSortedTasks()
         {
             ClearConsole();
             DisplayInfo();
@@ -185,7 +185,7 @@ namespace CollectionsAndLinq.UI
             });
         }
 
-        public void GetUserInfoAsync()
+        public void GetUserInfo()
         {
             ClearConsole();
             DisplayInfo();
@@ -218,7 +218,7 @@ namespace CollectionsAndLinq.UI
             }
         }
 
-        public void GetProjectsInfoAsync()
+        public void GetProjectsInfo()
         {
             var result = _dataProcessingService.GetProjectsInfoAsync().GetAwaiter().GetResult();
             if (result != null)
